@@ -1,0 +1,24 @@
+{
+  "name": "@vboard/auth",
+  "type": "module",
+  "exports": {
+    ".": {
+      "default": "./src/index.ts"
+    },
+    "./*": {
+      "default": "./src/*.ts"
+    }
+  },
+  "scripts": {},
+  "dependencies": {
+    "@vboard/db": "workspace:*",
+    "@vboard/env": "workspace:*",
+    "better-auth": "catalog:",
+    "dotenv": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@vboard/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}
