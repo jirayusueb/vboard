@@ -11,10 +11,6 @@
   },
   "dependencies": {
     "@elysiajs/cors": "^1.4.1",
-    "@orpc/openapi": "catalog:",
-    "@orpc/server": "catalog:",
-    "@orpc/zod": "catalog:",
-    "@sinclair/typebox": "^0.34.49",
     "@vboard/api": "workspace:*",
     "@vboard/auth": "workspace:*",
     "@vboard/db": "workspace:*",

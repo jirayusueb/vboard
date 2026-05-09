@@ -21,7 +21,8 @@
     "noUncheckedSideEffectImports": true,
     "paths": {
       "@/*": ["./src/*"],
-      "@vboard/ui/*": ["../../packages/ui/src/*"]
+      "@vboard/ui/*": ["../../packages/ui/src/*"],
+      "@vboard/server": ["../server/src/index.ts"]
     }
   }
 }
