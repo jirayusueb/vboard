@@ -4,7 +4,7 @@ import type { InviteTokenVO } from "../../domain/value-objects/invite-token.vo";
 import { db } from "../../../../shared/infrastructure/database";
 import { txStorage } from "../../../../shared/infrastructure/database/transaction-context";
 import { boardInvite } from "@vboard/db/schema/board";
-import { and, eq, isNotNull, lt } from "drizzle-orm";
+import { and, eq, isNotNull, lt } from "@vboard/db";
 import { toBoardInviteDomain } from "../mappers/board-invite.mapper";
 import { InviteTokenVO as TokenId } from "../../domain/value-objects/invite-token.vo";
 import { BoardIdVO as BoardId } from "../../domain/value-objects/board-id.vo";

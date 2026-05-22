@@ -5,7 +5,7 @@ import type { MemberRoleVO } from "../../domain/value-objects/member-role.vo";
 import { db } from "../../../../shared/infrastructure/database";
 import { txStorage } from "../../../../shared/infrastructure/database/transaction-context";
 import { boardMember } from "@vboard/db/schema/board";
-import { eq, and } from "drizzle-orm";
+import { eq, and } from "@vboard/db";
 import { toBoardMemberDomain } from "../mappers/board-member.mapper";
 import { BoardIdVO as Id } from "../../domain/value-objects/board-id.vo";
 

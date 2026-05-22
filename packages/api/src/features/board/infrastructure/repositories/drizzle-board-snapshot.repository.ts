@@ -4,7 +4,7 @@ import type { BoardIdVO } from "../../domain/value-objects/board-id.vo";
 import { db } from "../../../../shared/infrastructure/database";
 import { txStorage } from "../../../../shared/infrastructure/database/transaction-context";
 import { boardSnapshot } from "@vboard/db/schema/board";
-import { and, eq, desc, notInArray } from "drizzle-orm";
+import { and, eq, desc, notInArray } from "@vboard/db";
 import { toBoardSnapshotDomain } from "../mappers/board-snapshot.mapper";
 import { BoardIdVO as Id } from "../../domain/value-objects/board-id.vo";
 

@@ -5,7 +5,7 @@ import { db } from "../../../../shared/infrastructure/database";
 import { txStorage } from "../../../../shared/infrastructure/database/transaction-context";
 import { board } from "@vboard/db/schema/board";
 import { boardMember } from "@vboard/db/schema/board";
-import { eq } from "drizzle-orm";
+import { eq } from "@vboard/db";
 import { toBoardDomain } from "../mappers/board.mapper";
 import { BoardIdVO as Id } from "../../domain/value-objects/board-id.vo";
 

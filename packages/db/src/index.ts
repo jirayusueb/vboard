@@ -62,6 +62,9 @@ export function createDb() {
 
 export const db = createDb();
 
+// Re-export drizzle-orm query operators so consumers import from a single resolution.
+export { and, or, eq, ne, gt, gte, lt, lte, like, ilike, inArray, notInArray, isNull, isNotNull, not, asc, desc, sql, SQL, aliasedTable } from "drizzle-orm";
+
 /**
  * Close the database connection pool. Call during graceful shutdown.
  */
