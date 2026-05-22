@@ -104,7 +104,7 @@ export class BoardEntity {
 | ------------------ | -------------------------------------------------------------- | ------------------------------------------------------------- |
 | `strictNullChecks` | `true`                                                         | Catch null/undefined errors at compile time                   |
 | `composite`        | `true`                                                         | Required for project references (monorepo)                    |
-| No `any`           | Only for Elysia `mapResponse` generic + Yjs awareness callback | `any` only where external library types are genuinely untyped |
+| No `any`           | Only for Elysia `mapResponse` generic + genuinely untyped external APIs | `any` only where external library types are genuinely untyped |
 | Named exports only | No default exports                                             | Consistent import style, better tree-shaking                  |
 
 ## Export Style

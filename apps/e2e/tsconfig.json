@@ -1,0 +1,9 @@
+{
+  "extends": "@vboard/config/tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["@playwright/test", "node"],
+    "lib": ["ESNext", "DOM"],
+    "noUnusedLocals": false,
+    "noUnusedParameters": false
+  }
+}

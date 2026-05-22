@@ -1,5 +1,5 @@
 /**
- * BoardSnapshotEntity — a persisted Yjs document state.
+ * BoardSnapshotEntity — a persisted Loro document state.
  * Immutable — only has restore() (snapshots are created by infrastructure).
  */
 import type { BoardIdVO } from "../value-objects/board-id.vo";

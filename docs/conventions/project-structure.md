@@ -78,7 +78,7 @@ packages/api/src/
     │   ├── collab/         # Self-contained sub-module (4-layer, own IOC)
     │   │   ├── domain/     # AccessLevel VO, CollabErrors
     │   │   ├── application/ # 5 ports, ConnectCollabCommand use case
-    │   │   ├── infrastructure/ # YjsDocRegistry, BoardAccessChecker adapters
+    │   │   ├── infrastructure/ # LoroDocRegistry, BoardAccessChecker adapters
     │   │   ├── presentation/ # WS controller
     │   │   └── collab.ioc.ts # Own DI wiring
     │   └── board.ioc.ts    # Board DI wiring (uses createCollabModule)

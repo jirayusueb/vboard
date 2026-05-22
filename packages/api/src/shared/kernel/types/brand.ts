@@ -27,12 +27,12 @@ export function unbrand<T extends Brand<string, string>>(branded: T): string {
  * @example
  * ```ts
  * // Define a concrete ID VO:
- * export type TodoId = Brand<string, "TodoId">;
- * export const TodoIdVO = new IdVO<TodoId, "TodoId">("TodoId");
+ * export type BoardId = Brand<string, "BoardId">;
+ * export const BoardIdVO = new IdVO<BoardId, "BoardId">("BoardId");
  *
  * // Usage:
- * const id = TodoIdVO.create("abc");   // TodoId
- * const raw = TodoIdVO.unwrap(id);     // string
+ * const id = BoardIdVO.create("abc");   // BoardId
+ * const raw = BoardIdVO.unwrap(id);     // string
  * ```
  */
 export class IdVO<T extends Brand<string, B>, B extends string> {

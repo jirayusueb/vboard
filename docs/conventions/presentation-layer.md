@@ -253,4 +253,4 @@ export function createCollabWsController(collabService: ICollabService) {
 }
 ```
 
-The WS controller delegates to `ICollabService` which orchestrates authorization (via `ConnectCollabCommand`) and Yjs document management (via `IYDocRegistry`). All stateful logic lives in infrastructure, not the controller.
+The WS controller delegates to `ICollabService` which orchestrates authorization (via `ConnectCollabCommand`) and CRDT document management (via `ILoroDocRegistry`). All stateful logic lives in infrastructure, not the controller.

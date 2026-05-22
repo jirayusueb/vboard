@@ -21,4 +21,8 @@ export class CollabSnapshotRepository implements ICollabSnapshotRepository {
 	async save(boardId: string, data: Buffer): Promise<void> {
 		await this.boardSnapshotRepo.save(BoardIdVO.create(boardId), data);
 	}
+
+	async cleanupOld(boardId: string, keepCount: number): Promise<number> {
+		return this.boardSnapshotRepo.cleanupOld(BoardIdVO.create(boardId), keepCount);
+	}
 }

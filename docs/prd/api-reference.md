@@ -168,9 +168,9 @@ GET /board/:id/snapshot
 Auth: optional (resolveSession)
 ```
 
-Returns the latest Yjs binary state for the board.
+Returns the latest Loro binary state for the board.
 
-**Response** `200`: Binary `application/octet-stream` (Yjs encoded state)
+**Response** `200`: Binary `application/octet-stream` (Loro encoded state)
 
 **Response** `200` (no snapshot): `{ "data": null }`
 
@@ -347,13 +347,13 @@ WS /ws/collab/:boardId
 Auth: session cookie (validated on open)
 ```
 
-**Protocol**: Binary frames using y-websocket wire format.
+**Protocol**: Binary frames using custom Loro sync protocol.
 
 **Message types**:
 
 | Type | Name      | Direction     | Payload                                    |
 | ---- | --------- | ------------- | ------------------------------------------ |
-| 0    | Sync      | Bidirectional | Yjs sync protocol (step 1, step 2, update) |
+| 0    | Sync      | Bidirectional | Loro update (imported and re-broadcast)         |
 | 1    | Awareness | Bidirectional | Awareness state updates                    |
 
 **Lifecycle**:

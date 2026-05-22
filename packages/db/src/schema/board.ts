@@ -11,7 +11,7 @@ import {
 } from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
-// Custom type for binary data (Yjs snapshots)
+// Custom type for binary data (CRDT snapshots)
 const bytea = customType<{ data: Buffer; driverData: Buffer }>({
 	dataType() {
 		return "bytea";

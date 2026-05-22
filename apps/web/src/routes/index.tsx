@@ -1,11 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
 
-import { useEden } from "@/lib/eden";
-
-export const Route = createFileRoute("/")({
-	component: HomeComponent,
-});
+import { useEden } from "@/shared/lib/eden";
 
 const TITLE_TEXT = `
  ██████╗ ███████╗████████╗████████╗███████╗██████╗
@@ -23,9 +19,16 @@ const TITLE_TEXT = `
     ╚═╝       ╚══════╝   ╚═╝   ╚═╝  ╚═╝ ╚═════╝╚═╝  ╚═╝
  `;
 
-function HomeComponent() {
+const HomeComponent = () => {
 	const eden = useEden();
-	const healthCheck = useQuery(eden.rpc.healthCheck.get.queryOptions());
+	const healthCheck = useQuery(eden.api.health.get.queryOptions());
+
+	let statusText = "Disconnected";
+	if (healthCheck.isLoading) {
+		statusText = "Checking...";
+	} else if (healthCheck.data) {
+		statusText = "Connected";
+	}
 
 	return (
 		<div className="container mx-auto max-w-3xl px-4 py-2">
@@ -38,15 +41,15 @@ function HomeComponent() {
 							className={`h-2 w-2 rounded-full ${healthCheck.data ? "bg-green-500" : "bg-red-500"}`}
 						/>
 						<span className="text-muted-foreground text-sm">
-							{healthCheck.isLoading
-								? "Checking..."
-								: healthCheck.data
-									? "Connected"
-									: "Disconnected"}
+							{statusText}
 						</span>
 					</div>
 				</section>
 			</div>
 		</div>
 	);
-}
+};
+
+export const Route = createFileRoute("/")({
+	component: HomeComponent,
+});

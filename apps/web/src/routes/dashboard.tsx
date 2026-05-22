@@ -1,16 +1,25 @@
-import { useQuery } from "@tanstack/react-query";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
-import { getUser } from "@/functions/get-user";
-import { useEden } from "@/lib/eden";
+import { getUser } from "@/features/auth/get-user";
+
+const RouteComponent = () => {
+	const { session } = Route.useRouteContext();
+
+	return (
+		<div>
+			<h1>Dashboard</h1>
+			<p>Welcome {session?.user.name}</p>
+		</div>
+	);
+};
 
 export const Route = createFileRoute("/dashboard")({
-	component: RouteComponent,
 	beforeLoad: async () => {
 		const session = await getUser();
 		return { session };
 	},
-	loader: async ({ context }) => {
+	component: RouteComponent,
+	loader: ({ context }) => {
 		if (!context.session) {
 			throw redirect({
 				to: "/login",
@@ -18,18 +27,3 @@ export const Route = createFileRoute("/dashboard")({
 		}
 	},
 });
-
-function RouteComponent() {
-	const { session } = Route.useRouteContext();
-	const eden = useEden();
-
-	const privateData = useQuery(eden.rpc.privateData.get.queryOptions());
-
-	return (
-		<div>
-			<h1>Dashboard</h1>
-			<p>Welcome {session?.user.name}</p>
-			<p>API: {privateData.data?.message}</p>
-		</div>
-	);
-}

@@ -5,4 +5,6 @@
 export interface ICollabSnapshotRepository {
 	load(boardId: string): Promise<Buffer | null>;
 	save(boardId: string, data: Buffer): Promise<void>;
+	/** Delete all but the latest `keepCount` snapshots for a given board */
+	cleanupOld(boardId: string, keepCount: number): Promise<number>;
 }

@@ -65,13 +65,13 @@ Many-to-many join between users and boards with role.
 
 ### `board_snapshot`
 
-Stores Yjs CRDT state for persistence across sessions.
+Stores Loro CRDT state for persistence across sessions.
 
 | Column       | Type        | Constraints                        | Description                                        |
 | ------------ | ----------- | ---------------------------------- | -------------------------------------------------- |
 | `id`         | `serial`    | PK                                 | Auto-incrementing                                  |
 | `board_id`   | `text`      | FK → `board.id`, ON DELETE CASCADE | Parent board                                       |
-| `data`       | `bytea`     | NOT NULL                           | Binary Yjs encoded state (`Y.encodeStateAsUpdate`) |
+| `data`       | `bytea`     | NOT NULL                           | Binary Loro encoded state (`doc.export({ mode: "snapshot" })`) |
 | `created_at` | `timestamp` | NOT NULL, default `now()`          | When snapshot was taken                            |
 
 **Indexes**: `board_snapshot_board_id_idx` on `board_id`

@@ -14,7 +14,7 @@
 
 ## 2. Overview
 
-VBoard is a **real-time collaborative whiteboard** built into the existing VBoard monorepo. Users create boards (private or public), invite collaborators via shareable links, and draw together in real-time using **Excalidraw** as the drawing engine and **Yjs CRDT** for conflict-free state synchronization.
+VBoard is a **real-time collaborative whiteboard** built into the existing VBoard monorepo. Users create boards (private or public), invite collaborators via shareable links, and draw together in real-time using **Excalidraw** as the drawing engine and **Loro CRDT** for conflict-free state synchronization.
 
 **Why are we building this?** The VBoard platform currently offers auth and a basic todo demo. Adding a collaborative whiteboard serves as the core product differentiator — it demonstrates real-time multi-user capability, complex state management, and a polished drawing experience. This is the primary user-facing feature that turns VBoard from a demo into a usable product.
 
@@ -41,7 +41,7 @@ VBoard is a **real-time collaborative whiteboard** built into the existing VBoar
 
 | KPI                                       | Target           | Measurement                                              |
 | ----------------------------------------- | ---------------- | -------------------------------------------------------- |
-| Sync latency (local edit → remote render) | < 500ms p95      | Client-side telemetry on Yjs update round-trip           |
+| Sync latency (local edit → remote render) | < 500ms p95      | Client-side telemetry on Loro update round-trip           |
 | Data loss rate                            | 0 incidents      | No user reports of lost drawings after snapshot recovery |
 | Invite conversion rate                    | > 80%            | % of opened invite links that result in a new member     |
 | Board creation rate                       | ≥ 1 per new user | % of signed-up users who create at least one board       |
@@ -115,7 +115,7 @@ Without a compelling collaborative feature, VBoard remains a technical demo with
 
 - **FR-13**: As an editor, I want to draw on the canvas and see other editors' changes in real-time so that we can collaborate
 - **FR-14**: As a viewer, I want to see editors drawing in real-time so that I can follow along
-- **FR-15**: Edits must be synchronized using CRDT (Yjs) so that conflicts are resolved automatically
+- **FR-15**: Edits must be synchronized using CRDT (Loro) so that conflicts are resolved automatically
 - **FR-16**: Board state must persist across sessions so that no data is lost on disconnect
 
 #### Invite System
@@ -128,7 +128,7 @@ Without a compelling collaborative feature, VBoard remains a technical demo with
 
 #### Persistence
 
-- **FR-22**: Board canvas state must be saved as a Yjs snapshot when the last user disconnects
+- **FR-22**: Board canvas state must be saved as a Loro snapshot when the last user disconnects
 - **FR-23**: Board canvas state must be saved periodically (every 60 seconds) while users are connected
 - **FR-24**: When a board is opened, the latest snapshot must be loaded to restore the previous state
 
@@ -138,7 +138,7 @@ Without a compelling collaborative feature, VBoard remains a technical demo with
 | ------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
 | **Performance**     | Local edit latency < 100ms. Remote sync < 500ms p95. Excalidraw lazy-loaded in < 3s.                                                 |
 | **Reliability**     | Zero data loss — all edits captured by CRDT + snapshot persistence                                                                   |
-| **Scalability**     | Server handles ≥ 50 concurrent WebSocket connections per board. In-memory Y.Doc destroyed when last user disconnects to free memory. |
+| **Scalability**     | Server handles ≥ 50 concurrent WebSocket connections per board. In-memory LoroDoc destroyed when last user disconnects to free memory. |
 | **Security**        | All protected routes require valid session cookie. WebSocket connections authenticated on upgrade. No invite token reuse.            |
 | **Browser support** | Chrome 90+, Firefox 90+, Safari 15+, Edge 90+                                                                                        |
 | **Accessibility**   | Relies on Excalidraw's built-in keyboard navigation. Board list follows standard web accessibility.                                  |
@@ -239,9 +239,9 @@ The following are **explicitly not included** in v1 to prevent scope creep:
 
 | Dependency              | Version | Risk                        | Mitigation                     |
 | ----------------------- | ------- | --------------------------- | ------------------------------ |
-| Yjs                     | ^13.6   | Stable, well-maintained     | None needed                    |
+| Loro | ^13.6   | Stable, well-maintained     | None needed                    |
 | Excalidraw              | ^0.18   | Large bundle (~2MB)         | Lazy-loaded, no SSR            |
-| @mizuka-wu/y-excalidraw | ^2.0    | Community-maintained        | Fallback: build custom binding |
+| LoroExcalidrawBinding (in-house) | ^2.0    | Community-maintained        | Fallback: build custom binding |
 | @y/protocols            | ^1.0.6  | Low-level, stable           | None needed                    |
 | better-auth             | 1.6.9   | Handles sessions            | Already in use                 |
 | Elysia                  | ^1.4    | Macro types have edge cases | Workaround: object shorthand   |
@@ -370,7 +370,7 @@ GET /board/:id → 403 Forbidden
 | -------------------- | -------------------------------------------------------------------------------------------- | --------- |
 | **M1: Foundation**   | oRPC → Eden Treaty migration, board DB schema, domain layer (entities, VOs, repos, errors)   | ✅ Done   |
 | **M2: REST API**     | Board CRUD routes, invite endpoints, member management, auth macros                          | ✅ Done   |
-| **M3: Real-Time**    | WebSocket handler (Yjs sync), collab service, snapshot persistence                           | ✅ Done   |
+| **M3: Real-Time**    | WebSocket handler (Loro sync), collab service, snapshot persistence                           | ✅ Done   |
 | **M4: Frontend**     | Board list page, editor page (Excalidraw wrapper), invite claim page, useCollab hook         | ✅ Done   |
 | **M5: Integration**  | Server mounts all routes + WS, nav link added, type checks pass, build passes                | ✅ Done   |
 | **M5.5: Clean Arch** | Refactor `packages/api` to Feature-First Clean Architecture (4-layer, CQRS-lite, DI plugins) | ✅ Done   |
@@ -385,10 +385,10 @@ GET /board/:id → 403 Forbidden
 
 | #   | Risk                                                                               | Impact                              | Likelihood | Mitigation                                                                                        |
 | --- | ---------------------------------------------------------------------------------- | ----------------------------------- | ---------- | ------------------------------------------------------------------------------------------------- |
-| R1  | @mizuka-wu/y-excalidraw is community-maintained, may break with Excalidraw updates | High — canvas binding fails         | Medium     | Pin versions; fallback to custom Yjs↔Excalidraw binding using Y.XmlFragment                       |
+| R1  | Custom Loro↔Excalidraw binding is maintained in-tree alongside the app | Low — binding updated together     | Low        | Binding is part of the codebase, no external dep risk                       |
 | R2  | Large Excalidraw bundle (~2MB) slows initial load                                  | Medium — poor perceived performance | Low        | Lazy-loaded with Suspense fallback; consider code-splitting Excalidraw assets                     |
-| R3  | Snapshot grows large for complex boards (>1MB)                                     | Medium — slow persistence/recovery  | Low        | Yjs binary encoding is compact; add snapshot size monitoring                                      |
-| R4  | No offline support — all edits lost if WS disconnects before snapshot              | High — data loss                    | Medium     | Yjs client-side state survives tab refresh; only at risk on browser crash. v2: localStorage queue |
+| R3  | Snapshot grows large for complex boards (>1MB)                                     | Medium — slow persistence/recovery  | Low        | Loro binary encoding is compact; add snapshot size monitoring                                      |
+| R4  | No offline support — all edits lost if WS disconnects before snapshot              | High — data loss                    | Medium     | Loro client-side state survives tab refresh; only at risk on browser crash. v2: localStorage queue |
 | R5  | No rate limiting on invite generation or board creation                            | Low — abuse potential               | Medium     | v2: add rate limiting middleware                                                                  |
 | R6  | Elysia macro type inference edge cases                                             | Low — developer experience          | Low        | Documented workaround: object shorthand pattern                                                   |
 

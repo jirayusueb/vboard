@@ -274,9 +274,9 @@ The `features/board/collab/` submodule follows the same clean-arch testing strat
 | Application    | `application/usecases/commands/connect-collab.command.test.ts` | Access granted/denied, board not found         |
 | Infrastructure | `infrastructure/board-access-checker.test.ts`                  | Public/private + member/anonymous permutations |
 
-**Not tested** (Yjs internals, thin wrappers):
+**Not tested** (CRDT internals, thin wrappers):
 
-- `infrastructure/yjs-doc-registry.ts` — deep Yjs/lib0 internals
+- `infrastructure/loro-doc-registry.ts` — deep Loro CRDT internals
 - `infrastructure/collab.service.ts` — thin WS lifecycle wrapper
 - `infrastructure/collab-snapshot.repository.ts` — delegates to Drizzle
 - `presentation/collab-ws.controller.ts` — Elysia WS handler

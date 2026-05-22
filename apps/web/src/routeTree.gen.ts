@@ -9,19 +9,14 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TodosRouteImport } from './routes/todos'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as DashboardRouteImport } from './routes/dashboard'
 import { Route as BoardRouteImport } from './routes/board'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as BoardBoardIdRouteImport } from './routes/board/$boardId'
-import { Route as BoardInviteTokenRouteImport } from './routes/board/invite/$token'
+import { Route as BoardIndexRouteImport } from './routes/board.index'
+import { Route as BoardBoardIdRouteImport } from './routes/board.$boardId'
+import { Route as BoardInviteTokenRouteImport } from './routes/board.invite.$token'
 
-const TodosRoute = TodosRouteImport.update({
-  id: '/todos',
-  path: '/todos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -42,6 +37,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BoardIndexRoute = BoardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BoardRoute,
+} as any)
 const BoardBoardIdRoute = BoardBoardIdRouteImport.update({
   id: '/$boardId',
   path: '/$boardId',
@@ -58,17 +58,16 @@ export interface FileRoutesByFullPath {
   '/board': typeof BoardRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/todos': typeof TodosRoute
   '/board/$boardId': typeof BoardBoardIdRoute
+  '/board/': typeof BoardIndexRoute
   '/board/invite/$token': typeof BoardInviteTokenRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/board': typeof BoardRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/todos': typeof TodosRoute
   '/board/$boardId': typeof BoardBoardIdRoute
+  '/board': typeof BoardIndexRoute
   '/board/invite/$token': typeof BoardInviteTokenRoute
 }
 export interface FileRoutesById {
@@ -77,8 +76,8 @@ export interface FileRoutesById {
   '/board': typeof BoardRouteWithChildren
   '/dashboard': typeof DashboardRoute
   '/login': typeof LoginRoute
-  '/todos': typeof TodosRoute
   '/board/$boardId': typeof BoardBoardIdRoute
+  '/board/': typeof BoardIndexRoute
   '/board/invite/$token': typeof BoardInviteTokenRoute
 }
 export interface FileRouteTypes {
@@ -88,17 +87,16 @@ export interface FileRouteTypes {
     | '/board'
     | '/dashboard'
     | '/login'
-    | '/todos'
     | '/board/$boardId'
+    | '/board/'
     | '/board/invite/$token'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/board'
     | '/dashboard'
     | '/login'
-    | '/todos'
     | '/board/$boardId'
+    | '/board'
     | '/board/invite/$token'
   id:
     | '__root__'
@@ -106,8 +104,8 @@ export interface FileRouteTypes {
     | '/board'
     | '/dashboard'
     | '/login'
-    | '/todos'
     | '/board/$boardId'
+    | '/board/'
     | '/board/invite/$token'
   fileRoutesById: FileRoutesById
 }
@@ -116,18 +114,10 @@ export interface RootRouteChildren {
   BoardRoute: typeof BoardRouteWithChildren
   DashboardRoute: typeof DashboardRoute
   LoginRoute: typeof LoginRoute
-  TodosRoute: typeof TodosRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/todos': {
-      id: '/todos'
-      path: '/todos'
-      fullPath: '/todos'
-      preLoaderRoute: typeof TodosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -156,6 +146,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/board/': {
+      id: '/board/'
+      path: '/'
+      fullPath: '/board/'
+      preLoaderRoute: typeof BoardIndexRouteImport
+      parentRoute: typeof BoardRoute
+    }
     '/board/$boardId': {
       id: '/board/$boardId'
       path: '/$boardId'
@@ -175,11 +172,13 @@ declare module '@tanstack/react-router' {
 
 interface BoardRouteChildren {
   BoardBoardIdRoute: typeof BoardBoardIdRoute
+  BoardIndexRoute: typeof BoardIndexRoute
   BoardInviteTokenRoute: typeof BoardInviteTokenRoute
 }
 
 const BoardRouteChildren: BoardRouteChildren = {
   BoardBoardIdRoute: BoardBoardIdRoute,
+  BoardIndexRoute: BoardIndexRoute,
   BoardInviteTokenRoute: BoardInviteTokenRoute,
 }
 
@@ -190,7 +189,6 @@ const rootRouteChildren: RootRouteChildren = {
   BoardRoute: BoardRouteWithChildren,
   DashboardRoute: DashboardRoute,
   LoginRoute: LoginRoute,
-  TodosRoute: TodosRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

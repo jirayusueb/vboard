@@ -9,7 +9,7 @@ import type { IBoardSnapshotRepository } from "../application/ports/i-board-snap
 import { ConnectCollabCommand } from "./application/usecases/commands/connect-collab.command";
 import { BoardAccessChecker } from "./infrastructure/board-access-checker";
 import { CollabSnapshotRepository } from "./infrastructure/collab-snapshot.repository";
-import { YjsDocRegistry } from "./infrastructure/yjs-doc-registry";
+import { LoroDocRegistry } from "./infrastructure/loro-doc-registry";
 import { CollabService } from "./infrastructure/collab.service";
 import { createCollabWsController } from "./presentation/collab-ws.controller";
 
@@ -26,12 +26,16 @@ export function createCollabModule(deps: {
 	const connectCommand = new ConnectCollabCommand(accessChecker);
 
 	// Infrastructure layer
-	const docRegistry = new YjsDocRegistry(collabSnapshotRepo);
+	const docRegistry = new LoroDocRegistry(collabSnapshotRepo);
 	const collabService = new CollabService(connectCommand, docRegistry);
 	collabService.start();
 
 	// Presentation layer
 	const collabWs = createCollabWsController(collabService);
 
-	return new Elysia({ name: "collab-module" }).use(collabWs);
+	return {
+		plugin: new Elysia({ name: "collab-module" }).use(collabWs),
+		/** Persist all in-memory docs and clean up timers */
+		dispose: () => docRegistry.dispose(),
+	};
 }

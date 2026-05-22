@@ -19,7 +19,7 @@ export interface WSMeta {
 }
 
 /**
- * Cast a WSContext's raw field to a WSConn-like type for Yjs registry interop.
+ * Cast a WSContext's raw field to a WSConn-like type for Loro registry interop.
  * This is safe because the controller always passes a real Bun ServerWebSocket.
  */
 export function getRawConn(ws: WSContext): {

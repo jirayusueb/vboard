@@ -4,7 +4,7 @@ import type { BoardIdVO } from "../../domain/value-objects/board-id.vo";
 import { db } from "../../../../shared/infrastructure/database";
 import { txStorage } from "../../../../shared/infrastructure/database/transaction-context";
 import { boardSnapshot } from "@vboard/db/schema/board";
-import { eq, desc } from "drizzle-orm";
+import { and, eq, desc, notInArray } from "drizzle-orm";
 import { toBoardSnapshotDomain } from "../mappers/board-snapshot.mapper";
 import { BoardIdVO as Id } from "../../domain/value-objects/board-id.vo";
 
@@ -34,5 +34,31 @@ export class DrizzleBoardSnapshotRepository
 
 	private getDb() {
 		return txStorage.getStore() ?? db;
+	}
+
+	async cleanupOld(boardId: BoardIdVO, keepCount: number): Promise<number> {
+		// Find IDs of snapshots to keep (latest N)
+		const keepRows = await this.getDb()
+			.select({ id: boardSnapshot.id })
+			.from(boardSnapshot)
+			.where(eq(boardSnapshot.boardId, Id.unwrap(boardId)))
+			.orderBy(desc(boardSnapshot.createdAt))
+			.limit(keepCount);
+
+		if (keepRows.length === 0) return 0;
+
+		const keepIds = keepRows.map((r) => r.id);
+
+		// Delete all snapshots for this board that are NOT in the keep set
+		const deleted = await this.getDb()
+			.delete(boardSnapshot)
+			.where(
+				and(
+					eq(boardSnapshot.boardId, Id.unwrap(boardId)),
+					notInArray(boardSnapshot.id, keepIds),
+				),
+			);
+
+		return (deleted as unknown as { rowCount: number }).rowCount ?? 0;
 	}
 }

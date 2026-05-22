@@ -1,7 +1,7 @@
 /**
  * Port for the collaboration service — thin orchestrator for WebSocket lifecycle.
  * Authorization is handled by ConnectCollabCommand (application use case).
- * Yjs operations are delegated to IYDocRegistry.
+ * CRDT operations are delegated to ILoroDocRegistry.
  */
 import type { WSContext } from "./ws-context.port";
 import type { AccessLevel } from "../../domain/value-objects/access-level.vo";

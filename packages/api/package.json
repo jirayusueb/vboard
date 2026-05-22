@@ -21,14 +21,12 @@
     "@vboard/auth": "workspace:*",
     "@vboard/db": "workspace:*",
     "@vboard/env": "workspace:*",
-    "@y/protocols": "catalog:",
+    "loro-crdt": "catalog:",
     "better-result": "catalog:",
     "dotenv": "catalog:",
     "drizzle-orm": "catalog:",
     "elysia": "catalog:",
-    "lib0": "catalog:",
     "uuidv7": "^1.2.1",
-    "yjs": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {

@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:18
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: vboard
+      POSTGRES_PASSWORD: vboard
+      POSTGRES_DB: vboard
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U vboard"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:

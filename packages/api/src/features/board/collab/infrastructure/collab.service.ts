@@ -1,10 +1,10 @@
 /**
  * CollabService — thin ICollabService implementation.
  * Authorization delegated to ConnectCollabCommand.
- * Yjs operations delegated to IYDocRegistry.
+ * CRDT operations delegated to ILoroDocRegistry.
  */
 import type { ICollabService } from "../application/ports/i-collab-service.port";
-import type { IYDocRegistry } from "../application/ports/i-ydoc-registry.port";
+import type { ILoroDocRegistry } from "../application/ports/i-loro-doc-registry.port";
 import type { WSContext } from "../application/ports/ws-context.port";
 import type { ConnectCollabCommand } from "../application/usecases/commands/connect-collab.command";
 import type { AccessLevel } from "../domain/value-objects/access-level.vo";
@@ -16,7 +16,7 @@ export class CollabService implements ICollabService {
 
 	constructor(
 		private readonly connectCommand: ConnectCollabCommand,
-		private readonly docRegistry: IYDocRegistry,
+		private readonly docRegistry: ILoroDocRegistry,
 	) {}
 
 	start(): void {
@@ -45,8 +45,8 @@ export class CollabService implements ICollabService {
 		const { accessLevel } = result.unwrap();
 		const conn = getRawConn(ws);
 
-		// Register with Yjs doc registry
-		this.docRegistry.register(boardId, conn);
+		// Register with Loro doc registry
+		await this.docRegistry.register(boardId, conn);
 
 		// Store metadata on WSContext for message/close handlers
 		ws.boardMeta = {

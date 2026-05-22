@@ -97,7 +97,11 @@ export function createBoardModule(deps: {
 		snapshotRepo,
 	});
 
-	return new Elysia({ name: "board-module" })
-		.use(boardController)
-		.use(collabModule);
+	return {
+		plugin: new Elysia({ name: "board-module" })
+			.use(boardController)
+			.use(collabModule.plugin),
+		/** Persist all in-memory Loro docs before shutdown */
+		dispose: () => collabModule.dispose(),
+	};
 }

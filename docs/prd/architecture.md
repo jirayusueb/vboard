@@ -9,10 +9,10 @@
 │  ┌──────────────────┐  ┌───────────────────────────────┐    │
 │  │ TanStack Router   │  │ Excalidraw Canvas             │    │
 │  │ (file-based)      │  │ ┌───────────────────────────┐│    │
-│  │                   │  │ │ @mizuka-wu/y-excalidraw   ││    │
-│  │ /board            │  │ │ (ExcalidrawBinding)       ││    │
+│  │                   │  │ │ LoroExcalidrawBinding    ││    │
+│  │ /board            │  │ │ (Loro ↔ Excalidraw)      ││    │
 │  │ /board/:id        │  │ └─────────┬─────────────────┘│    │
-│  │ /board/invite/:t  │  │           │ Y.Doc            │    │
+│  │ /board/invite/:t  │  │           │ LoroDoc            │    │
 │  └───────┬───────────┘  └───────────┼──────────────────┘    │
 │          │                         │                         │
 │  ┌───────┴───────────┐  ┌──────────┴──────────┐             │
@@ -29,9 +29,9 @@
 │  │                                                       │    │
 │  │  ┌─────────────┐  ┌──────────────┐  ┌──────────────┐ │    │
 │  │  │ authPlugin  │  │ boardRoutes  │  │  collabWs    │ │    │
-│  │  │ (macro)     │  │ (REST API)   │  │  (Yjs WS)   │ │    │
+│  │  │ (macro)     │  │ (REST API)   │  │  (Loro WS)   │ │    │
 │  │  │             │  │              │  │              │ │    │
-│  │  │ auth: true  │  │ GET/POST/    │  │ WSSharedDoc  │ │    │
+│  │  │ auth: true  │  │ GET/POST/    │  │ LoroSharedDoc  │ │    │
 │  │  │ resolveSesn │  │ PATCH/DELETE │  │ room manager │ │    │
 │  │  └──────┬──────┘  └──────┬───────┘  └──────┬───────┘ │    │
 │  │         │                │                  │         │    │
@@ -67,7 +67,7 @@ vboard/
 │   └── web/                       # TanStack Start (React SSR)
 │       └── src/
 │           ├── lib/
-│           │   ├── collab.ts      # useCollab hook (Yjs + WS)
+│           │   ├── collab.ts      # useCollab hook (Loro + WS)
 │           │   └── eden.ts        # Eden Treaty client + EdenProvider
 │           ├── components/
 │           │   ├── excalidraw-wrapper.tsx  # Lazy-loaded canvas
@@ -89,7 +89,7 @@ vboard/
 │   │       │   ├── repositories/  # Drizzle-backed data access
 │   │       │   ├── services/      # BoardAccessService
 │   │       │   ├── routes.ts      # REST API (Elysia plugin)
-│   │       │   └── collab.ts      # WebSocket handler (Yjs sync)
+│   │       │   └── collab.ts      # WebSocket handler (Loro sync)
 │   │       └── routers/
 │   │           └── todo.ts        # Legacy todo routes
 │   ├── db/                        # Drizzle schema + client
@@ -144,24 +144,24 @@ if (Result.isError(result)) {
 const { board, member } = Result.unwrap(result);
 ```
 
-### 3. Yjs WebSocket via Elysia `ws()`
+### 3. Loro WebSocket via Elysia `ws()`
 
-**Problem**: Standard y-websocket requires a separate Node.js server.
+**Problem**: We need a custom WebSocket handler for real-time CRDT sync.
 
-**Solution**: Custom `WSSharedDoc` class implementing the y-websocket protocol natively in Elysia's `ws()`:
+**Solution**: Custom `LoroSharedDoc` class wrapping a `LoroDoc` with connection tracking and broadcasting:
 
-- Room-per-board: `docs` Map holds `WSSharedDoc` instances keyed by board ID
-- Protocol: sync (msg type 0) + awareness (msg type 1) — same wire format as y-websocket
+- Room-per-board: `docs` Map holds `LoroSharedDoc` instances keyed by board ID
+- Protocol: sync (msg type 0) + ephemeral (msg type 1) — custom binary protocol for Loro updates
 - Auth on `open()`: validates session cookie, checks board access via `BoardAccessService`
 - Read-only connections: sync messages dropped for viewers
 
 ### 4. Snapshot Persistence
 
-**Strategy**: Encode full Yjs state as binary (`Y.encodeStateAsUpdate`) stored in `bytea`:
+**Strategy**: Encode full Loro state as binary (`doc.export({ mode: "snapshot" })`) stored in `bytea`:
 
-- **On last disconnect**: When `WSSharedDoc.conns.size === 0`, persist and destroy
+- **On last disconnect**: When `LoroSharedDoc.conns.size === 0`, persist and destroy
 - **Periodic (60s)**: For active boards, background `setInterval`
-- **On open**: `WSSharedDoc` constructor calls `loadSnapshot()` to hydrate from DB
+- **On open**: `LoroSharedDoc` constructor calls `loadSnapshot()` to hydrate from DB
 
 ### 5. Lazy-Loaded Excalidraw
 
@@ -194,14 +194,11 @@ Client A                Server                Client B
    │  auth (cookie)       │      auth (cookie)   │
    │  access check        │      access check    │
    │                      │                      │
-   │◄─ sync step 1 ──────│◄──── sync step 1 ───│
-   │  (state vector)      │      (state vector)  │
+   │◄─ initial snapshot ──│◄──── initial snapshot ──│
+   │  (Loro full doc)     │      (Loro full doc) │
    │                      │                      │
-   │── sync step 2 ──────►│── sync step 2 ─────►│
-   │  (missing state)     │      (missing state) │
-   │                      │                      │
-   │── update ────────────►│── broadcast ────────►│
-   │  (draw element)      │      (draw element)  │
+   │── Loro update ──────►│── broadcast ────────►│
+   │  (draw element)      │      (Loro delta)    │
    │                      │                      │
    │                      │                      │
    │  ... drawing ...     │      ... drawing ... │
@@ -228,8 +225,8 @@ Client A                Server                Client B
 | Concern               | Approach                                                                    |
 | --------------------- | --------------------------------------------------------------------------- |
 | **Excalidraw bundle** | Lazy-loaded, no SSR                                                         |
-| **Yjs memory**        | Docs destroyed when last user disconnects                                   |
-| **Snapshot size**     | Yjs binary encoding is compact; full state typically <100KB                 |
+| **Loro memory**        | Docs destroyed when last user disconnects                                   |
+| **Snapshot size**     | Loro binary encoding is compact; full state typically <100KB                 |
 | **DB queries**        | Indexed foreign keys; snapshot queries ordered by `created_at DESC LIMIT 1` |
 | **WebSocket**         | Binary frames (ArrayBuffer), not JSON                                       |
 | **API types**         | Eden Treaty — no codegen, derives from `typeof app`                         |
@@ -252,7 +249,7 @@ packages/api/src/
     │   ├── application/     # Ports (interfaces), DTOs, use cases (queries/ + commands/)
     │   ├── infrastructure/  # Drizzle repos, mappers (DB row → domain entity)
     │   ├── presentation/    # HTTP controller (Zod schemas), collab WS controller
-    │   ├── collab/          # Sub-module: Yjs doc registry, collab service, WS handler
+    │   ├── collab/          # Sub-module: Loro doc registry, collab service, WS handler
     │   └── board.ioc.ts     # DI wiring (Elysia plugin factory)
     └── todo/
         ├── domain/          # TodoEntity
